@@ -21,20 +21,20 @@
 
 
 class Database {
-public:
-    explicit Database();
-    ~Database();
-
-    bool connectToDatabase();
-    bool closeDatabase();
-    bool createTable();
-
 private:
     QSqlDatabase db;
 
     bool openDatabase();
     bool restoreDatabase();
+    bool createTable();
+
+public:
+    explicit Database();
+    ~Database();
+
+    bool connectToDatabase();
     bool insertIntoTable(const QVariantList &data);
     bool deleteFromTable(int index);
+    bool closeDatabase();
 };
 

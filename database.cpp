@@ -62,9 +62,9 @@ bool Database::createTable() {
     QSqlQuery query;
 
     if (!query.exec( "CREATE TABLE " TABLE " ( id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                            TABLE_IMAGE             " BLOB                  NOT NULL, "
-                            TABLE_HASH              " TEXT                  NOT NULL, "
-                            TABLE_SIMILARITY        " REAL                  NOT NULL ) "
+                            TABLE_IMAGE             " BLOB                	NOT NULL, "
+                            TABLE_HASH              " TEXT                 	NOT NULL, "
+                            TABLE_SIMILARITY        " REAL                 	NOT NULL ) "
     )) {
         qDebug() << "Database: error of create " << TABLE;
         qDebug() << query.lastError().text();
@@ -80,17 +80,20 @@ bool Database::createTable() {
 
 
 bool Database::insertIntoTable(const QVariantList &data) {
-
     QSqlQuery query;
+    QString query_string = "INSERT INTO " TABLE " ( "    TABLE_IMAGE " , "
+                                    TABLE_HASH " , "
+                                    TABLE_SIMILARITY " ) "
+                                    "VALUES ( :image, :hash, :similarity ) ";
 
-    query.prepare("INSERT INTO " TABLE " ( "    TABLE_IMAGE " , "
-                                                TABLE_HASH " , "
-                                                TABLE_SIMILARITY " ) "
-                    " VALUES ( :image, :hesh, :similarity ) " );
+
+    query.prepare(query_string);
 
     query.bindValue(":image",               data[0] );
     query.bindValue(":hash",                data[1] );
     query.bindValue(":similarity",          data[2] );
+
+    qDebug() << ">>>" << query_string << "\n";
 
     if (!query.exec()) {
         qDebug() << "error insert into " << TABLE;

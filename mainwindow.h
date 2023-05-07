@@ -22,14 +22,21 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+signals:
+//    void insertIntoTable(QVariantList list);
+
 private slots:
     void startStopScreenshots();
+    void on_pb_startstop_released();
+//    void insertIntoTableSlot(QVariantList list);
 
 private:
     Ui::MainWindow 	*ui;
     Database 		*database;
     QSqlQueryModel 	*query_model;
-    bool		is_work;
+    bool			is_work;
+    QVariantList 	data;
+    QList<QVariantList> 	temp_data;
 
     QAction *startStopAction;
     QAction *minimizeAction;
@@ -45,7 +52,8 @@ private:
     void configurateDatabase();
     void configurateWindow();
 
-    QPixmap& getScreenshot();
+    QPixmap getScreenshot();
+    void startStopWork();
     void workInThread();
     void worker();
 };

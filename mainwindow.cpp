@@ -8,6 +8,7 @@
 #include <QByteArray>
 #include <thread>
 #include <chrono>
+#include <memory>
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -26,21 +27,18 @@ MainWindow::MainWindow(QWidget *parent)
     this->configurateWindow();
     this->is_work = false;
 
-
     qDebug() << "MainWindow: configurate done\n";
+//////////////////////////////////////////////////
+//    QVariantList data;
+//    //        data.append(screenshot);
+//    data.append("tests");
+//    data.append("test");
+//    data.append(1.1);
 
+//    this->database->insertIntoTable(data);
 
-
-    // add to image grid
-//    ui->listOfImages->addItem(new QListWidgetItem(QIcon(":/resource/eye.png"), "eye"));
-//    ui->listOfImages->addItem(new QListWidgetItem(QIcon(":/resource/whiteeye.png"), "whiteeye"));
-//    ui->listOfImages->addItem(new QListWidgetItem(QIcon(":/resource/whiteeye.png"), "whiteeye"));
-//    ui->listOfImages->addItem(new QListWidgetItem(QIcon(":/resource/whiteeye.png"), "whiteeye"));
-//    ui->listOfImages->addItem(new QListWidgetItem(QIcon(":/resource/whiteeye.png"), "whiteeye"));
-//    ui->listOfImages->addItem(new QListWidgetItem(QIcon(":/resource/whiteeye.png"), "whiteeye"));
-//    ui->listOfImages->addItem(new QListWidgetItem(QIcon(":/resource/whiteeye.png"), "whiteeye"));
-//    ui->listOfImages->addItem(new QListWidgetItem(QIcon(":/resource/whiteeye.png"), "whiteeye"));
-//    ui->listOfImages->addItem(new QListWidgetItem(QIcon(":/resource/whiteeye.png"), "whiteeye"));
+//    this->query_model->setQuery("SELECT * FROM Data");
+//    qDebug() << "---" << this->query_model->data(this->query_model->index(0, 3)) << "---\n";
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -55,6 +53,7 @@ MainWindow::~MainWindow() {
     delete this->quitAction;
     delete this->trayIcon;
     delete this->trayIconMenu;
+    delete this->query_model;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -62,27 +61,25 @@ MainWindow::~MainWindow() {
 void MainWindow::startStopScreenshots() {
     qDebug() << "MainWindow::startStopScreenshots clicked\n";
 
-    ui->statusbar->showMessage("Hash sum: ---");
-    ui->listOfImages->scrollToBottom();
-
-    this->workInThread();
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//    QImage im = originalPixmap.toImage();
-//    QByteArray ba;
-//    QBuffer buffer(&ba);
-//    im.save(&buffer, "PNG");
-
-//    QByteArray image_file = ba;
-//    QByteArray hash_image = QCryptographicHash::hash(image_file, QCryptographicHash::Sha1);
-
-//    qDebug() << QString::fromStdString(hash_image.toHex().toStdString()) << "\n";
-
-//    ui->statusbar->showMessage(QString::fromStdString(hash_image.toHex().toStdString()));
-//    ui->listOfImages->addItem(new QListWidgetItem(originalPixmap, "eye"));
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MainWindow::on_pb_startstop_released() {
+    qDebug() << "PushBatton: pb_startstop released\n";
+
+    this->startStopWork();
+//    this->query_model->setQuery("SELECT * FROM Data");
+//    qDebug() << "---" << this->query_model->data(this->query_model->index(0, 3)) << "---\n";
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+//void MainWindow::insertIntoTableSlot(QVariantList list) {
+//    this->database->insertIntoTable(list);
+//    this->query_model->setQuery("SELECT * FROM Data");
+//    qDebug() << "---" << this->query_model->data(this->query_model->index(0, 3)) << "---\n";
+//}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -101,6 +98,8 @@ void MainWindow::configurateSignalsSlots() {
 
     quitAction = new QAction(tr("&Quit"), this);
     connect(quitAction, &QAction::triggered, qApp, &QCoreApplication::quit);
+
+//    connect(this, &MainWindow::insertIntoTable, this, &MainWindow::insertIntoTableSlot);
 
     qDebug() << "MainWindow::configurateSignalsSlots done\n";
 }
@@ -133,12 +132,13 @@ void MainWindow::configurateSystemTray() {
 void MainWindow::configurateDatabase() {
     this->database = new Database;
     this->database->connectToDatabase();
+    this->query_model = new QSqlQueryModel;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MainWindow::configurateWindow() {
-    ui->statusbar->showMessage("Hash sum: ---");
+    ui->statusbar->showMessage("");
     QPalette p;
     ui->listOfImages->setViewMode(QListWidget::IconMode);
     this->ui->listOfImages->setIconSize(QSize(200, 200));
@@ -149,8 +149,7 @@ void MainWindow::configurateWindow() {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-QPixmap& MainWindow::getScreenshot() {
-    QPixmap screenshot;
+QPixmap MainWindow::getScreenshot() {
     QScreen *screen = QGuiApplication::primaryScreen();
 
     if (const QWindow *window = windowHandle())
@@ -159,9 +158,24 @@ QPixmap& MainWindow::getScreenshot() {
     // beep ! ! !
     QApplication::beep();
 
-    screenshot = screen->grabWindow(0);
+    return screen->grabWindow(0);
+}
 
-    return screenshot;
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MainWindow::startStopWork() {
+    this->is_work = !this->is_work;
+
+    if(is_work) {
+        this->workInThread();
+    }
+
+    if(!this->temp_data.empty()) {
+        for(QVariantList x : temp_data) {
+            this->database->insertIntoTable(x);
+        }
+        this->temp_data.clear();
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -174,8 +188,36 @@ void MainWindow::workInThread() {
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MainWindow::worker() {
-    qDebug() << "MainWindow::worker is run\n";
-    // simulation hard work
-//    std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+    while(this->is_work) {
+        qDebug() << "MainWindow::worker is run\n";
+        std::this_thread::sleep_for(std::chrono::milliseconds(ui->sb_time->text().toInt() * 1000));
+
+        if(!this->is_work)
+            break;
+
+        QPixmap screenshot = this->getScreenshot();
+        QByteArray ba;
+        QBuffer buffer(&ba);
+
+        screenshot.save(&buffer, "PNG");
+
+        QByteArray image_file = ba;
+        QByteArray hash_image = QCryptographicHash::hash(image_file, QCryptographicHash::Sha1);
+        QString hash_of_image = QString::fromStdString(hash_image.toHex().toStdString());
+
+        qDebug() << "Hash of images: " << hash_of_image << "\n";
+
+
+//        data.append(screenshot);
+        this->data.clear();
+        this->data.append("test");
+        this->data.append(hash_of_image);
+        this->data.append(15.4);
+
+        this->temp_data.append(this->data);
+
+        ui->statusbar->showMessage(hash_of_image);
+        ui->listOfImages->insertItem(0, new QListWidgetItem(screenshot, ""));
+    }
 }
 
