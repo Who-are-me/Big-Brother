@@ -2,5 +2,10 @@
     <qresource prefix="/">
         <file>resource/whiteeye.png</file>
         <file>resource/eye.png</file>
+        <file alias="images/down_arrow.png">resource/down_arrow.png</file>
+        <file alias="/images/handle.png">resource/handle.png</file>
+    </qresource>
+    <qresource prefix="/qss">
+        <file>resource/style.qss</file>
     </qresource>
 </RCC>

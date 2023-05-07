@@ -2,6 +2,9 @@
 
 #include <QApplication>
 #include <QMessageBox>
+#include <QFile>
+#include <QString>
+
 
 
 int main(int argc, char *argv[]) {
@@ -20,6 +23,12 @@ int main(int argc, char *argv[]) {
 
     MainWindow mainwindow;
     mainwindow.show();
+
+    QFile style_file(":/qss/resource/style.qss");
+    style_file.open(QFile::ReadOnly);
+    QString style(style_file.readAll());
+
+    application.setStyleSheet(style);
 
     return application.exec();
 }

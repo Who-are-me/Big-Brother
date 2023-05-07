@@ -22,13 +22,9 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-signals:
-//    void insertIntoTable(QVariantList list);
-
 private slots:
     void startStopScreenshots();
     void on_pb_startstop_released();
-//    void insertIntoTableSlot(QVariantList list);
 
 private:
     Ui::MainWindow 	*ui;
@@ -37,6 +33,7 @@ private:
     bool			is_work;
     QVariantList 	data;
     QList<QVariantList> 	temp_data;
+    QByteArray		last_screenshot;
 
     QAction *startStopAction;
     QAction *minimizeAction;

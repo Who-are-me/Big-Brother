@@ -38,7 +38,7 @@ MainWindow::MainWindow(QWidget *parent)
 //    this->database->insertIntoTable(data);
 
 //    this->query_model->setQuery("SELECT * FROM Data");
-//    qDebug() << "---" << this->query_model->data(this->query_model->index(0, 3)) << "---\n";
+//    qDebug() << "---" << this->query_model->data(this->query_model->index(3, 1)) << "---\n";
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -54,6 +54,13 @@ MainWindow::~MainWindow() {
     delete this->trayIcon;
     delete this->trayIconMenu;
     delete this->query_model;
+
+    if(!this->temp_data.empty()) {
+        for(QVariantList x : temp_data) {
+            this->database->insertIntoTable(x);
+        }
+        this->temp_data.clear();
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -69,17 +76,7 @@ void MainWindow::on_pb_startstop_released() {
     qDebug() << "PushBatton: pb_startstop released\n";
 
     this->startStopWork();
-//    this->query_model->setQuery("SELECT * FROM Data");
-//    qDebug() << "---" << this->query_model->data(this->query_model->index(0, 3)) << "---\n";
 }
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-
-//void MainWindow::insertIntoTableSlot(QVariantList list) {
-//    this->database->insertIntoTable(list);
-//    this->query_model->setQuery("SELECT * FROM Data");
-//    qDebug() << "---" << this->query_model->data(this->query_model->index(0, 3)) << "---\n";
-//}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -98,8 +95,6 @@ void MainWindow::configurateSignalsSlots() {
 
     quitAction = new QAction(tr("&Quit"), this);
     connect(quitAction, &QAction::triggered, qApp, &QCoreApplication::quit);
-
-//    connect(this, &MainWindow::insertIntoTable, this, &MainWindow::insertIntoTableSlot);
 
     qDebug() << "MainWindow::configurateSignalsSlots done\n";
 }
@@ -133,6 +128,31 @@ void MainWindow::configurateDatabase() {
     this->database = new Database;
     this->database->connectToDatabase();
     this->query_model = new QSqlQueryModel;
+
+    this->query_model->setQuery("SELECT COUNT(*) FROM Data");
+    int count_of_rows = this->query_model->data(this->query_model->index(0, 0)).toInt();
+
+    this->query_model->setQuery("SELECT * FROM Data");
+
+    QPixmap pm;
+    QByteArray ba;
+    QString hash;
+
+    if(count_of_rows == 0) {
+        this->last_screenshot = QByteArray::fromStdString("");
+    }
+
+    for(int x = 0; x < count_of_rows; ++x) {
+        ba = this->query_model->data(this->query_model->index(x, 1)).toByteArray();
+        hash = this->query_model->data(this->query_model->index(x, 2)).toString();
+        pm.loadFromData(ba, "PNG" );
+
+        if(count_of_rows-1 == x) {
+            this->last_screenshot = ba;
+        }
+
+        ui->listOfImages->insertItem(0, new QListWidgetItem(pm, hash));
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -207,17 +227,37 @@ void MainWindow::worker() {
 
         qDebug() << "Hash of images: " << hash_of_image << "\n";
 
-
-//        data.append(screenshot);
         this->data.clear();
-        this->data.append("test");
+        this->data.append(image_file);
         this->data.append(hash_of_image);
-        this->data.append(15.4);
 
+        double min = 0, max = 0, similarity_charters = 0;
+
+        if(this->last_screenshot.size() < image_file.size()) {
+            min = this->last_screenshot.size();
+            max = image_file.size();
+        }
+        else {
+            min = image_file.size();
+            max = this->last_screenshot.size();
+        }
+
+
+        for(size_t it = 0; it < min; ++it) {
+            if(this->last_screenshot[it] == image_file[it]) {
+                ++similarity_charters;
+            }
+        }
+
+        this->data.append(similarity_charters / max * 100);
         this->temp_data.append(this->data);
 
+//        qDebug() << "Max-Min: " << max << " - " min << "\n";
+//        qDebug() << "Similarity: " << similarity_charters << "\n";
+        qDebug() << "Similarity: " << QString::number(similarity_charters / max * 100) << "\n";
+
         ui->statusbar->showMessage(hash_of_image);
-        ui->listOfImages->insertItem(0, new QListWidgetItem(screenshot, ""));
+        ui->listOfImages->insertItem(0, new QListWidgetItem(screenshot, hash_of_image));
     }
 }
 
