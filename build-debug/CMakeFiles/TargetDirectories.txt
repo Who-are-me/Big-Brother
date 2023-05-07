@@ -1,0 +1,9 @@
+/home/forever/.dropbox/data/Dropbox/Projects/Qt/big_brother/build-debug/CMakeFiles/Big-Brother.dir
+/home/forever/.dropbox/data/Dropbox/Projects/Qt/big_brother/build-debug/CMakeFiles/edit_cache.dir
+/home/forever/.dropbox/data/Dropbox/Projects/Qt/big_brother/build-debug/CMakeFiles/rebuild_cache.dir
+/home/forever/.dropbox/data/Dropbox/Projects/Qt/big_brother/build-debug/CMakeFiles/list_install_components.dir
+/home/forever/.dropbox/data/Dropbox/Projects/Qt/big_brother/build-debug/CMakeFiles/install.dir
+/home/forever/.dropbox/data/Dropbox/Projects/Qt/big_brother/build-debug/CMakeFiles/install/local.dir
+/home/forever/.dropbox/data/Dropbox/Projects/Qt/big_brother/build-debug/CMakeFiles/install/strip.dir
+/home/forever/.dropbox/data/Dropbox/Projects/Qt/big_brother/build-debug/CMakeFiles/Big-Brother_autogen_timestamp_deps.dir
+/home/forever/.dropbox/data/Dropbox/Projects/Qt/big_brother/build-debug/CMakeFiles/Big-Brother_autogen.dir
