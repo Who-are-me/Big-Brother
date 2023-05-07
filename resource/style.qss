@@ -142,7 +142,6 @@ QComboBox::down-arrow {
 }
 
 
-
 /* QGroupBox */
 
 QGroupBox {
@@ -601,32 +600,15 @@ QTableView {
 
 
 
-QSpinBox,
-QSpinBox:editable,
-QSpinBox:hover,
-QSpinBox:pressed {
 
-}
-QSpinBox:focus {
 
-}
-QSpinBox:disabled {
 
-}
-QSpinBox::up-button {
 
-}
-QSpinBox::down-button {
 
-}
-QSpinBox::up-arrow {
 
-}
-QSpinBox::up-arrow:disabled,
-QSpinBox::up-arrow:off {
 
-}
-QSpinBox::down-arrow:disabled,
-QSpinBox::down-arrow:off {
 
-}
+
+
+
+
