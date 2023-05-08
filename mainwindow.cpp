@@ -8,7 +8,7 @@
 #include <QByteArray>
 #include <thread>
 #include <chrono>
-#include <memory>
+#include <algorithm>
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -28,17 +28,6 @@ MainWindow::MainWindow(QWidget *parent)
     this->is_work = false;
 
     qDebug() << "MainWindow: configurate done\n";
-//////////////////////////////////////////////////
-//    QVariantList data;
-//    //        data.append(screenshot);
-//    data.append("tests");
-//    data.append("test");
-//    data.append(1.1);
-
-//    this->database->insertIntoTable(data);
-
-//    this->query_model->setQuery("SELECT * FROM Data");
-//    qDebug() << "---" << this->query_model->data(this->query_model->index(3, 1)) << "---\n";
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -68,6 +57,7 @@ MainWindow::~MainWindow() {
 void MainWindow::startStopScreenshots() {
     qDebug() << "MainWindow::startStopScreenshots clicked\n";
 
+    this->startStopWork();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -139,7 +129,7 @@ void MainWindow::configurateDatabase() {
     QString hash;
 
     if(count_of_rows == 0) {
-        this->last_screenshot = QByteArray::fromStdString("");
+        this->last_screenshot = QByteArray::fromStdString("empty empty empty");
     }
 
     for(int x = 0; x < count_of_rows; ++x) {
@@ -153,6 +143,8 @@ void MainWindow::configurateDatabase() {
 
         ui->listOfImages->insertItem(0, new QListWidgetItem(pm, hash));
     }
+
+    qDebug() << "MainWindow::configurateDatabase done\n";
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -177,6 +169,14 @@ QPixmap MainWindow::getScreenshot() {
 
     // beep ! ! !
     QApplication::beep();
+
+    QPixmap screenshot = screen->grabWindow(0);
+    QByteArray ba;
+    QBuffer buffer(&ba);
+
+    screenshot.save(&buffer, "PNG");
+
+    this->last_screenshot = ba;
 
     return screen->grabWindow(0);
 }
@@ -208,8 +208,9 @@ void MainWindow::workInThread() {
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MainWindow::worker() {
+    qDebug() << "MainWindow::worker is run\n";
+
     while(this->is_work) {
-        qDebug() << "MainWindow::worker is run\n";
         std::this_thread::sleep_for(std::chrono::milliseconds(ui->sb_time->text().toInt() * 1000));
 
         if(!this->is_work)
@@ -231,32 +232,25 @@ void MainWindow::worker() {
         this->data.append(image_file);
         this->data.append(hash_of_image);
 
-        double min = 0, max = 0, similarity_charters = 0;
-
-        if(this->last_screenshot.size() < image_file.size()) {
-            min = this->last_screenshot.size();
-            max = image_file.size();
-        }
-        else {
-            min = image_file.size();
-            max = this->last_screenshot.size();
-        }
+        double  similarity_charters = 0,
+                similarity_percent = 0;
 
 
-        for(size_t it = 0; it < min; ++it) {
-            if(this->last_screenshot[it] == image_file[it]) {
+        for(size_t it = 0; it < std::min(this->last_screenshot.size(), image_file.size()); ++it) {
+            if(this->last_screenshot.at(it) == image_file.at(it)) {
                 ++similarity_charters;
             }
         }
 
-        this->data.append(similarity_charters / max * 100);
+        similarity_percent = (similarity_charters / std::min(this->last_screenshot.size(), image_file.size()) * 100);
+
+        qDebug() << "Similarity of images: " << similarity_percent << "\n";
+
+        this->data.append(similarity_percent);
         this->temp_data.append(this->data);
 
-//        qDebug() << "Max-Min: " << max << " - " min << "\n";
-//        qDebug() << "Similarity: " << similarity_charters << "\n";
-        qDebug() << "Similarity: " << QString::number(similarity_charters / max * 100) << "\n";
-
-        ui->statusbar->showMessage(hash_of_image);
+        ui->persent_of_similarity->setText(QString::number(similarity_percent));
+        ui->statusbar->showMessage("Hash sum: " + hash_of_image);
         ui->listOfImages->insertItem(0, new QListWidgetItem(screenshot, hash_of_image));
     }
 }
