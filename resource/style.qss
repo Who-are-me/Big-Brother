@@ -27,7 +27,7 @@ QWidget:disabled {
 }
 QWidget:focus {
     border: 1px solid #EEE0B7;
-    border-radius: 7px;
+    border-radius: 5px;
 }
 
 
@@ -465,7 +465,7 @@ QRadioButton::indicator:checked, QRadioButton::indicator:unchecked{
     color: #b1b1b1;
     background-color: #323232;
     border: 1px solid #b1b1b1;
-    border-radius: 7px;
+    border-radius: 5px;
 }
 
 QRadioButton::indicator:checked {
@@ -488,7 +488,7 @@ QCheckBox::indicator{
 }
 
 QRadioButton::indicator {
-    border-radius: 7px;
+    border-radius: 5px;
 }
 
 QRadioButton::indicator:hover, QCheckBox::indicator:hover {
@@ -596,16 +596,35 @@ QTableView {
 
 
 
+QSpinBox {
+        border: 1px solid #616161;
+        border-radius: 5px;
+}
 
 
+QSpinBox::up-arrow, QDoubleSpinBox::up-arrow, QTimeEdit::up-arrow, QDateEdit::up-arrow, QDateTimeEdit::up-arrow {
+        image: url(:/resource/go-up.png);
+        padding: 1px;
+        margin: 0px;
+}
 
+QSpinBox::up-button {
+        padding: 1px;
+        margin: 0px;
+        background-color: #393538;
+}
 
+QSpinBox::down-arrow, QDoubleSpinBox::down-arrow, QTimeEdit::down-arrow, QDateEdit::down-arrow, QDateTimeEdit::down-arrow {
+        image: url(:/resource/go-down.png);
+        padding: 1px;
+        margin: 0px;
+}
 
-
-
-
-
-
+QSpinBox::down-button {
+        padding: 1px;
+        margin: 0px;
+        background-color: #393538;
+}
 
 
 

@@ -157,6 +157,7 @@ void MainWindow::configurateWindow() {
     this->ui->listOfImages->setResizeMode(QListWidget::Adjust);
     p.setBrush(QPalette::Window, Qt::transparent);
     this->ui->listOfImages->setPalette(p);
+    ui->sb_time->setStyleSheet("");
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////

@@ -50,6 +50,7 @@ private:
     void configurateWindow();
 
     QPixmap getScreenshot();
+    void extracted();
     void startStopWork();
     void workInThread();
     void worker();
